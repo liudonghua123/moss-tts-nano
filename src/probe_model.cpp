@@ -1,6 +1,19 @@
 #include <iostream>
 #include <fstream>
+#include <string>
 #include <onnxruntime_cxx_api.h>
+
+#ifdef _WIN32
+#include <windows.h>
+std::wstring ToOrtPath(const std::string& str) {
+    int size_needed = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), (int)str.size(), NULL, 0);
+    std::wstring wstrTo(size_needed, 0);
+    MultiByteToWideChar(CP_UTF8, 0, str.c_str(), (int)str.size(), &wstrTo[0], size_needed);
+    return wstrTo;
+}
+#else
+std::string ToOrtPath(const std::string& str) { return str; }
+#endif
 
 void probeModel(Ort::Session& sess, const char* name) {
     std::cout << std::endl << "=== " << name << " ===" << std::endl;
@@ -37,15 +50,15 @@ int main() {
     Ort::SessionOptions opts;
 
     std::cout << "Probing local_decoder model..." << std::endl;
-    Ort::Session local_dec(env, L"onnx/MOSS-TTS-Nano-100M-ONNX/moss_tts_local_decoder.onnx", opts);
+    Ort::Session local_dec(env, ToOrtPath("onnx/MOSS-TTS-Nano-100M-ONNX/moss_tts_local_decoder.onnx").c_str(), opts);
     probeModel(local_dec, "LOCAL DECODER");
 
     std::cout << std::endl << "Probing local_fixed_sampled_frame model..." << std::endl;
-    Ort::Session local_frame(env, L"onnx/MOSS-TTS-Nano-100M-ONNX/moss_tts_local_fixed_sampled_frame.onnx", opts);
+    Ort::Session local_frame(env, ToOrtPath("onnx/MOSS-TTS-Nano-100M-ONNX/moss_tts_local_fixed_sampled_frame.onnx").c_str(), opts);
     probeModel(local_frame, "LOCAL FIXED SAMPLED FRAME");
 
     std::cout << std::endl << "Probing codec decode model..." << std::endl;
-    Ort::Session codec_dec(env, L"onnx/MOSS-Audio-Tokenizer-Nano-ONNX/moss_audio_tokenizer_decode_full.onnx", opts);
+    Ort::Session codec_dec(env, ToOrtPath("onnx/MOSS-Audio-Tokenizer-Nano-ONNX/moss_audio_tokenizer_decode_full.onnx").c_str(), opts);
     probeModel(codec_dec, "CODEC DECODE FULL");
 
     return 0;

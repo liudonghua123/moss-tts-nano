@@ -227,7 +227,7 @@ int main(int argc, char* argv[]) {
         // Check if it's a built-in voice name
         bool is_path = (args.voice_name.find('/') != string::npos ||
                        args.voice_name.find('\\') != string::npos ||
-                       args.voice_name.find('.wav') != string::npos);
+                       args.voice_name.find(".wav") != string::npos);
 
         if (!is_path && args.voice_name == "junhao") {
             // Use built-in Junhao voice
@@ -498,7 +498,7 @@ int main(int argc, char* argv[]) {
 
             if (args.verbose && step < 5) {
                 cout << "Step " << step << ": frame=[";
-                for (int i = 0; i < min(3, N_VQ); ++i) cout << frame[i] << (i < 2 ? "," : "");
+                for (int i = 0; i < 3 && i < N_VQ; ++i) cout << frame[i] << (i < 2 ? "," : "");
                 cout << "...]" << endl;
             }
 
