@@ -1,0 +1,26 @@
+# ONNX models
+onnx/
+
+# Generated audio
+*.wav
+
+# Build output
+build/
+.vs/
+*.exe
+*.dll
+*.pdb
+
+# IDE
+.vscode/
+.idea/
+
+# CMake
+CMakeLists.txt.user
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+*.cmake
+
+# Dependency builds
+_deps/
