@@ -10,34 +10,53 @@ env:
   HF_REPO_TTS: MOSS-TTS-Nano-100M-ONNX
   HF_REPO_CODEC: MOSS-Audio-Tokenizer-Nano-ONNX
 
+permissions: write-all
+
 jobs:
   models:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Download TTS ONNX models
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+      - name: Install Hugging Face Hub CLI
+        run: |
+          python -m pip install --upgrade huggingface_hub
+      - name: Prepare ONNX directory
         run: |
           mkdir -p onnx
-          pip install huggingface-hub
-          huggingface-cli download ${{ env.HF_ORG }}/${{ env.HF_REPO_TTS }} --local-dir onnx/MOSS-TTS-Nano-100M-ONNX
-      - name: Download Codec ONNX models
+      - name: Download TTS ONNX models
+        continue-on-error: true
         run: |
-          huggingface-cli download ${{ env.HF_ORG }}/${{ env.HF_REPO_CODEC }} --local-dir onnx/MOSS-Audio-Tokenizer-Nano-ONNX
+          hf download ${{ env.HF_ORG }}/${{ env.HF_REPO_TTS }} --local-dir onnx/MOSS-TTS-Nano-100M-ONNX
+      - name: Download Codec ONNX models
+        continue-on-error: true
+        run: |
+          hf download ${{ env.HF_ORG }}/${{ env.HF_REPO_CODEC }} --local-dir onnx/MOSS-Audio-Tokenizer-Nano-ONNX
       - name: Create tarball
-        run: tar -cvzf onnx.tar.gz onnx/
+        run: tar -cvzf onnx.tar.gz --exclude='.cache' onnx/
       - name: Upload ONNX models
         uses: softprops/action-gh-release@v1
         with:
+          tag_name: latest
           files: onnx.tar.gz
-          tag_name: ${{ github.ref_name }}
-          release_name: ONNX Models
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build:
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            platform: linux
+          - os: windows-latest
+            platform: windows
+          - os: macos-latest
+            platform: macos
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -55,21 +74,22 @@ jobs:
         run: |
           mkdir -p dist/voices
           # Copy executable
-          if [ "${{ matrix.os }}" = "windows-latest" ]; then
-            cp build/Release/Release/moss-tts-nano.exe dist/
-            cp build/Release/Release/onnxruntime*.dll dist/ 2>/dev/null || true
+          if [ "${{ matrix.platform }}" = "windows" ]; then
+            cp build/Release/moss-tts-nano.exe dist/
+            cp build/Release/onnxruntime*.dll dist/ 2>/dev/null || true
           else
-            cp build/Release/moss-tts-nano dist/
+            cp build/moss-tts-nano dist/
           fi
           # Copy voices dir (empty, just for structure)
           cp -r voices dist/ 2>/dev/null || true
           # Create tarball
-          tar -cvzf moss-tts-nano-${{ matrix.os }}.tar.gz dist/
+          cd dist && tar -cvzf ../moss-tts-nano-${{ matrix.platform }}.tar.gz .
+        shell: bash
 
       - name: Upload Release Asset
         uses: softprops/action-gh-release@v1
         with:
+          tag_name: latest
           files: moss-tts-nano-*.tar.gz
-          tag_name: ${{ github.ref_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

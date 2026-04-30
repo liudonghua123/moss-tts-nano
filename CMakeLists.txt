@@ -35,7 +35,7 @@ FetchContent_MakeAvailable(sentencepiece)
 file(GLOB_RECURSE ORT_INC_DIR "${onnxruntime_SOURCE_DIR}/onnxruntime_cxx_api.h")
 get_filename_component(ORT_INC_DIR "${ORT_INC_DIR}" DIRECTORY)
 
-file(GLOB_RECURSE ORT_LIBS "${onnxruntime_SOURCE_DIR}/*.lib" "${onnxruntime_SOURCE_DIR}/*.so" "${onnxruntime_SOURCE_DIR}/*.dylib")
+file(GLOB ORT_LIBS "${onnxruntime_SOURCE_DIR}/lib/*.lib" "${onnxruntime_SOURCE_DIR}/lib/*.so" "${onnxruntime_SOURCE_DIR}/lib/*.dylib")
 list(FILTER ORT_LIBS INCLUDE REGEX ".*\\.lib$|.*\\.so$|.*\\.dylib$")
 
 # --- Build Target ---

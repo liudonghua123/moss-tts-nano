@@ -31,12 +31,14 @@ MOSS-TTS-Nano is a lightweight voice cloning TTS model that can synthesize speec
 ### Build
 
 ```bash
-mkdir -p build && cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
-cmake --build . --config Release
+mkdir -p build
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release -- -j$(nproc)
 ```
 
-The executable will be at `build/Release/Release/moss-tts-nano.exe` (Windows) or `build/Release/moss-tts-nano` (Linux/macOS).
+The executable will be at:
+- Linux/macOS: `build/moss-tts-nano`
+- Windows (Visual Studio): `build/Release/moss-tts-nano.exe`
 
 ### Download Models (if not using release package)
 
